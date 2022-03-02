@@ -11,5 +11,28 @@ published: false
 Tridactyl は以下のような機能をもっています。
 
 - Vim ライクなキーバインドで Firefox を操作できる
-- Vim ライクな設定ファイルでキーバインドを管理できる
+- Vim ライクな設定ファイルでキーバインドなどを管理できる
 - Vim ライクな設定ファイルでコマンドを定義できる
+
+## Vim ライクなキーバインドで Firefox を操作できる
+
+- hjkl で移動できる
+- f でリンクをクリックできる
+
+## Vim ライクな設定ファイルでキーバインドなどを管理できる
+
+- bind, unbind がある
+- : でコマンド名を入力することもできる
+- colors でテーマを管理できる
+
+## Vim ライクな設定ファイルでコマンドを定義できる
+
+- js, command で JS を使ってコマンドを定義できる
+- composite でコマンドを合成できる
+- autocmd で自動でコマンドを実行できる
+
+## 実例
+
+- translate
+- opentwitterintent
+- addfeedly
