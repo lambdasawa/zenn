@@ -3,7 +3,7 @@ title: "1Password の CLI で環境変数を管理する"
 emoji: "㊙️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["1password", "cli", "env"]
-published: false
+published: true
 ---
 
 ## はじめに
