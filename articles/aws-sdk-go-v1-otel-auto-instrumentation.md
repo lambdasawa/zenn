@@ -1,5 +1,5 @@
 ---
-title: "AWS SDK for Go v1 を使った API コールに対して OpenTelemetry の Span を自動で作成する"
+title: "AWS SDK for Go v1 の API 呼び出しごとに OpenTelemetry の Span を自動で作成する"
 emoji: "👁️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["go", "opentelemetry"]
@@ -11,8 +11,7 @@ published: false
 S3, SQS, DynamoDB など AWS のサービスを活用した Go アプリケーションを運用する際、 OpenTelemetry などを使って分散トレーシングを導入したくなることがあると思います。
 
 [otelaws](https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws) としてそのためのライブラリが公開されており、基本的にはこれを導入するだけで対応できます。
-しかし、これは AWS SDK for Go v2 に対応しており、 v1 には対応していません。
-
+しかし、これは AWS SDK for Go v2 のみに対応しており、 v1 には対応していません。
 この記事では v2 にバージョンアップできない場合などに使える代替案を紹介します。
 
 まず v2 ではどのように対応されているのか、コードを読んで確認します。
@@ -20,9 +19,9 @@ S3, SQS, DynamoDB など AWS のサービスを活用した Go アプリケー�
 
 <https://github.com/open-telemetry/opentelemetry-go-contrib/blob/main/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws/aws.go>
 
-v2 では `AppendMiddlewares` という関数をクライアントオブジェクトに対して呼び出してあげれば自動で Span が作成されるようです。
+v2 では `otelaws.AppendMiddlewares` という関数をクライアントオブジェクトに対して呼び出してあげれば自動で Span が作成されるようです。
 
-ところで AWS SDK for Go の middleware と v2 で導入された仕組みです。 ([AWS の発表](https://aws.amazon.com/jp/about-aws/whats-new/2021/01/aws-sdk-for-go-version-2-now-generally-available/))
+ところで AWS SDK for Go の middleware は v2 で導入された仕組みです。 ([AWS の発表](https://aws.amazon.com/jp/about-aws/whats-new/2021/01/aws-sdk-for-go-version-2-now-generally-available/))
 v1 には middleware は存在しないので、このコードをそのまま利用するのは難しそうです。
 
 しかし v1 には `Handlers` という構造体があり、これが middleware のような役割を果たしています
@@ -51,7 +50,7 @@ services:
       - "127.0.0.1:4566:4566"
 ```
 
-`Handlers` を用いて自動で `Span` を作成するための関数は以下のようになります。
+`Handlers` を用いて自動で `Span` を作成するための関数は以下のように実装できます。
 
 ```go
 import "github.com/aws/aws-sdk-go/aws/client"
@@ -79,7 +78,7 @@ func instrument(client *client.Client) {
 }
 ```
 
-実際の `otelaws` は timestamp, span kind, 複数の attribute を設定していますが、ここでは省略しています。
+実際の `otelaws` では timestamp、span kind、その他にも複数の attribute が設定されますが、ここでは省略しています。
 ここは v2 でも v1 でも対して変わらないので、以下のコードを参考にすることによって自分で簡単に設定できるのではないかと思います。
 
 <https://github.com/open-telemetry/opentelemetry-go-contrib/blob/main/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws/aws.go>
@@ -115,3 +114,8 @@ sess := session.Must(session.NewSession(&aws.Config{
 このコードを呼び出した結果は Jaeger で見ると以下のようになります。
 
 ![](https://storage.googleapis.com/zenn-user-upload/d6c1455e6d88-20221016.png)
+
+## 最後に
+
+AWS SDK Go for v2 を使えればこのようなことをしなくても良いですが、諸事情で v1 を使う判断をすることもあると思います。
+そのような場合にこの記事が役立てば幸いです。
