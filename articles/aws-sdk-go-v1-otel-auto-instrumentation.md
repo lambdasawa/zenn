@@ -117,5 +117,8 @@ sess := session.Must(session.NewSession(&aws.Config{
 
 ## 最後に
 
+実際に動作するコードの全体は <https://github.com/lambdasawa/zenn/tree/main/snippet/aws-sdk-go-v1-otel-auto-instrumentation> にあります。
+必要に応じて参照してください。
+
 AWS SDK Go for v2 を使えればこのようなことをしなくても良いですが、諸事情で v1 を使う判断をすることもあると思います。
 そのような場合にこの記事が役立てば幸いです。
