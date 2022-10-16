@@ -71,7 +71,7 @@ func parseAnd(input string) elastic.Query {
 		queries[i] = parseSimple(input)
 	}
 
-ƒ	// elasticsearch では filter で AND 検索になる
+	// elasticsearch では filter で AND 検索になる
 	return elastic.NewBoolQuery().Filter(queries...)
 }
 ```
@@ -99,7 +99,7 @@ var (
 	})
 
 	// 構文解析器
-  // これを使うと単なる string を RootQuery 型の構造体に変換できる
+	// これを使うと単なる string を RootQuery 型の構造体に変換できる
 	parser = participle.MustBuild[RootQuery](participle.Lexer(lex))
 )
 
@@ -107,9 +107,14 @@ type (
 	RootQuery = SimpleQuery
 
 	SimpleQuery struct {
-		Key       string   `@Key` // 字句解析器で定義した Key にマッチさせる
-		Separator struct{} `':'` // コロンの1文字にマッチさせる
-		Value     string   `@Value` // 字句解析器で定義した Value にマッチさせる
+		// @Key は字句解析器で定義した Key にマッチさせるという意味
+		Key       string   `@Key`
+
+		// コロンの1文字にマッチさせるという意味
+		Separator struct{} `':'`
+
+		// @Value は字句解析器で定義した Value にマッチさせるという意味
+		Value     string   `@Value`
 	}
 )
 
@@ -127,12 +132,15 @@ type (
 +	RootQuery = AndQuery
 
 +	AndQuery struct {
-+		Head SimpleQuery `@@` // @@ を指定してこのフィールドの型の構造体の定義にマッチさせる
-+		Tail []AndTail   `@@*` // アスタリスクは繰り返しを意味する
++		// @@ を指定してこのフィールドの型の構造体の定義にマッチさせる
++		Head SimpleQuery `@@`
++
++		// アスタリスクは繰り返しを意味する
++		Tail []AndTail   `@@*`
 +	}
 +
 +	AndTail struct {
-+		Separator struct{}      `'AND'` // AND という文字列にマッチさせる
++		Separator struct{}      `'AND'`
 +		Tail      []SimpleQuery `@@*
 +	}
 +
@@ -208,7 +216,7 @@ type (
 	}
 
 +	SimpleOrGroup struct {
-+		// パイプで分岐できる。これは SimpleQuery か RootQuery のどちらかにマッチするという意味。
++		// パイプで分岐できる。これらは SimpleQuery か RootQuery のどちらかにマッチするという意味。
 +		SimpleQuery *SimpleQuery `@@`
 +		GroupQuery  *RootQuery   `| '(' @@ ')'`
 +	}
@@ -328,7 +336,10 @@ func (o *SimpleQuery) ToElastic() elastic.Query {
 
 ## 最後に
 
-一般的な Web サービスで独自かつ厳格なクエリをサポートすることはあまり無いかもしれませんが、このような機能が充実しているとヘビーユーザはとても喜ぶと思います。
+実行可能なコードは [GitHub](https://github.com/lambdasawa/zenn/blob/main/snippet/golang-parser-library-participle/by-generator/main.go) にあります。
+必要に応じて参照してみてください。
+
+一般的な Web サービスでこのようなクエリをサポートすることはあまり無いかもしれませんが、このような機能が充実しているとヘビーユーザはとても喜ぶと思います。
 (個人的には Twitter のクエリをそこそこ活用しています。)
 
 ニッチなケースかも知れませんが、このような機能の実装が必要になった際の参考になれば幸いです。
