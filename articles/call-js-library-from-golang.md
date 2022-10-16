@@ -94,9 +94,9 @@ fmt.Printf("%v\n", v) // FOO と出力される
 ```
 
 Go には `strings.ToUpper` という関数がありますが、 `string` に `toUpperCase` というメソッドがあるわけはありません。
-しかし JavaScript には `string` に `toUpperCase` というメソッドがあります。上記のサンプルはこれを利用しています。
+しかし JavaScript には `String` に `toUpperCase` というメソッドがあります。上記のサンプルはこれを利用しています。
 
-`vm.RunString` の引数を `nunjucks.renderString(template, { clientValue: someClientValue })` に変えたら、それですぐに `nunjucks` を Go から使えるようになるかというと、そうではありません。
+`vm.RunString` の引数を `"foo".toUppserCase()` から `nunjucks.renderString(template, { clientValue: someClientValue })` に変えたら、それですぐに `nunjucks` を Go から使えるようになるかというとそうではありません。
 `goja` が `nunjuncks` のライブラリ自体のコードを読み込んでいないためです。
 
 どうにかして `goja` に `nunjucks` のコードも読み込ませるための手段として、 `esbuild` を使って必要なコードを全てバンドルして、それを `goja` に読み込ませることにします。
@@ -153,7 +153,8 @@ async function callSendMailAPI(body) {
 - }
 - 
 function App() {
-  const [template, setTemplate] = useState("<h1>Hello, {{ clientValue.toUpperCase() }}!</h1>");
+-  const [template, setTemplate] = useState("<h1>Hello, {{ clientValue.toUpperCase() }}!</h1>");
++  const [template, setTemplate] = useState("<h1>Hello, {{ serverValue.toUpperCase() }}!</h1>");
 
   return (
     <div className="App">
@@ -209,4 +210,4 @@ func main() {
 今回は [goja](https://github.com/dop251/goja) を使用しましたが、 似たようなことを実現するライブラリとして [otto](https://github.com/robertkrimen/otto), [v8go](https://github.com/rogchap/v8go) というものがあります。
 必要に応じて比較検討していただければと思います。
 
-実行可能なサンプルコードは [GitHub](https://github.com/lambdasawa/zenn/blob/main/snippet/call-javascript-library-from-golang/) にあるので必要に応じて参照してください。
+実行可能なサンプルコードは [GitHub](https://github.com/lambdasawa/zenn/tree/main/snippet/call-js-library-from-golang) にあるので必要に応じて参照してください。
