@@ -35,65 +35,160 @@ eval $(op signin)
 
 ## 変数の設定
 
-`foo` というアプリを作ることを想定して `foo-app-environment-variables` というセキュアノートを作ります。
+`foo-vault` という保管庫に `foo-item` というタイトルのセキュアノートを作る際は以下のコマンドを実行します。
 
 ```sh
-op item create --title foo-app-environment-variables --category 'Secure Note'
+op item create --vault foo-vault --title foo-item --category 'Secure Note'
 ```
 
 例として環境変数を2つ追加します。
+ここでは `foo-section` というセクションに値を追加することにします。セクションは省略可能ですが、省略した場合は自動でランダムな名前が付きます。
 
 ```sh
-op item edit foo-app-environment-variables FOO=bar
-op item edit foo-app-environment-variables FIZZ=buzz
+op item edit --vault foo-vault foo-item foo-section.FOO=bar
+op item edit --vault foo-vault foo-item foo-section.FIZZ=buzz
 ```
 
 ここでは `op item edit` コマンドを使用しましたが、もちろんGUI上から設定しても良いです。
 
 1Password上では以下の画像のように表示されます。`FIZZ` だけ `Reveal` しています。
 
-![secure-note](https://storage.googleapis.com/zenn-user-upload/90274bc60d25-20220505.png)
+![secure note](https://storage.googleapis.com/zenn-user-upload/787756aaa8fa-20230106.png)
 
 ## 変数の参照
 
-`op item get --format json` でセキュアノートの各フィールドをJSON形式で出力できます。
-このJSONを `jq` を使って `export FOO=bar` の形式に整えて `eval` します。
+例えば `foo-vault` という保管庫に `foo-item` という名前のアイテムがある場合は `op item get --format json --vault foo-vault foo-item` というコマンドで以下のような JSON を取得できます。
 
-```sh
-eval $(op item get --format json foo-app-environment-variables | jq -r '.fields[] | select(.value) | "export " + (.label) + "=\"" + (.value) + "\""')
+```json
+{
+  "id": "XXXXXXXXXXXXXXXX",
+  "title": "foo-item",
+  "version": 4,
+  "vault": {
+    "id": "XXXXXXXXXXXXXXXX",
+    "name": "foo-vault"
+  },
+  "category": "SECURE_NOTE",
+  "last_edited_by": "XXXXXXXXXXXXXXXX",
+  "created_at": "2023-01-05T23:03:45Z",
+  "updated_at": "2023-01-05T23:05:14Z",
+  "sections": [
+    {
+      "id": "XXXXXXXXXXXXXXXX",
+      "label": "foo-section"
+    }
+  ],
+  "fields": [
+    {
+      "id": "notesPlain",
+      "type": "STRING",
+      "purpose": "NOTES",
+      "label": "notesPlain",
+      "reference": "op://foo-vault/foo-item/notesPlain"
+    },
+    {
+      "id": "XXXXXXXXXXXXXXXX",
+      "section": {
+        "id": "XXXXXXXXXXXXXXXX",
+        "label": "foo-section"
+      },
+      "type": "CONCEALED",
+      "label": "FOO",
+      "value": "bar",
+      "reference": "op://foo-vault/foo-item/foo-section/FOO"
+    },
+    {
+      "id": "XXXXXXXXXXXXXXXX",
+      "section": {
+        "id": "XXXXXXXXXXXXXXXX",
+        "label": "foo-section"
+      },
+      "type": "CONCEALED",
+      "label": "FIZZ",
+      "value": "buzz",
+      "reference": "op://foo-vault/foo-item/foo-section/FIZZ"
+    }
+  ]
+}
 ```
 
-そうすると現在のシェルに環境変数が設定された状態になります。
+`jq` コマンドでいい感じにクエリしたりフォーマットすることによって `.env` ファイルを作ったり、 GitHub Actions にこの設定を同期したりするすることが可能です。
+
+`.env` ファイルを作る例:
 
 ```sh
-$ echo $FOO
+op item get --format json --vault foo-vault foo-item | jq -r '.fields[] | select(.value) | (.label) + "=" + (.value)'
+```
+
+GitHub Actions にこの設定を同期する例:
+
+```sh
+eval $(op item get --format json --vault foo-vault foo-item | jq -r '.fields[] | select(.value) | "gh secret set " + (.label) + " -b \"" + (.value) + "\""')
+```
+
+## secret reference
+
+`op` コマンドでは secret reference と呼ばれる以下のような構文が使えます。
+先程の `op item get` コマンドの出力に含まれる `reference` というフィールドがそれです。
+
+```txt
+op://vault-name/item-name/section-name]field-name
+```
+
+この secret reference を `op read` コマンドに渡すことによって、値を1つだけ取り出すことができます。
+
+```sh
+$ op read op://foo-vault/foo-item/foo-section/FOO
 bar
 ```
 
-## ユーティリティの用意
+## .env ファイルを生成するアプローチ
 
-ここまでセットアップが完了したら例えば `env.sh` のような名前でシェルスクリプトを用意して、長いコマンドを入力しなくても環境変数を設定できるようにしておくと便利でしょう。
+`op read` コマンドを活用すると色々なことができますが、ファイルの一部分に 1Password 上の値を埋め込みたいだけであれば `op inject` コマンドを使うと便利です。
+`op read` コマンドと同様に secret reference が使用できます。
 
 ```sh
+$ cat .gitignore
+.env
+
+$ cat .env.template
+HOGE=op://lambdasawa-sandbox/op-cli/default/HOGE
+
+$ op inject -i .env.template -o .env
+
+$ cat .env
+HOGE=hogehogehoge
+```
+
+`op inject` コマンドは `.env` のフォーマットに限らず、 YAML や JSON などのファイルに対しても使用できます。
+
+## 環境変数設定済みのシェルを立ち上げるアプローチ
+
+`op inject` コマンドでファイルに値を埋め込むことができるので、 `op run` コマンドと `direnv` などの仕組みを使って 1Password の値を環境変数に埋め込むことができます。
+しかし `op run` コマンドを使うと `direnv` などに依存せずに環境変数を設定することができます。
+
+```sh
+$ cat .env.template
+FOO=op://foo-vault/foo-item/foo-section/FOO
+
+# このシェルでは環境変数が未設定なので何も出力されない
 $ echo $FOO
-(何も表示されない)
 
-$ cat env.sh
-eval $(op signin)
-eval $(op item get --format json foo-app-environment-variables | jq -r '.fields[] | select(.value) | "export " + (.label) + "=\"" + (.value) + "\""')
+# このコマンドで環境変数が設定された状態で bash が起動する
+$ op run --env-file=.env.template --no-masking bash
 
-$ source env.sh
-
+# 環境変数が取れることが確認できる
 $ echo $FOO
 bar
+
+$ exit
+exit
+
+# exit したら未設定の状態の戻るので何も出力されない
+$ echo $FOO
 ```
 
-こうすることで最初に誰かがこの設定した後、他の人は `source env.sh` を実行するだけで1Password上の環境変数をシェルに反映できます。
+## 参考情報
 
-## (応用例) GitHub Actionsと連携する
-
-`gh` コマンドを併用すればGitHub Actionsに同様のシークレットを設定するのも簡単です。
-
-```sh
-eval $(op item get --format json foo-app-environment-variables | jq -r '.fields[] | select(.value) | "gh secret set " + (.label) + " -b \"" + (.value) + "\""')
-```
+- <https://developer.1password.com/docs/cli/secret-references>
+- <https://developer.1password.com/docs/cli/secrets-config-files>
