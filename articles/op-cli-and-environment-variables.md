@@ -117,7 +117,7 @@ op item edit --vault foo-vault foo-item foo-section.FIZZ=buzz
 `.env` ファイルを作る例:
 
 ```sh
-op item get --format json --vault foo-vault foo-item | jq -r '.fields[] | select(.value) | (.label) + "=" + (.value)'
+op item get --format json --vault foo-vault foo-item | jq -r '.fields[] | select(.value) | (.label) + "=" + (.value)' > .env
 ```
 
 GitHub Actions にこの設定を同期する例:
