@@ -2,7 +2,7 @@
 title: "AWS 上でサーバレス構成で HTTP レスポンスをストリーミングする"
 emoji: "🌌"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["aws", "lambda , "apprunner", "go", "http"]
+topics: ["aws", "lambda", "apprunner", "go", "http"]
 publication_name: "microcms"
 published: true
 ---
@@ -13,7 +13,7 @@ published: true
 
 最近、上記のブログで Lambda でレスポンスをストリーミングできるようになったという話がありました。
 
-自分がこのブログを読んだ時、ここで話されているストリーミングとは HTTP のレイヤで説明すると何者なのだろうか、という疑問を持ちました
+自分がこのブログを読んだ時、ここで話されているストリーミングとは HTTP のレイヤで説明すると何者なのだろうか、という疑問を持ちました。
 最近この辺りを調査したので、その内容をこの記事でまとめます。
 
 また、他の AWS + サーバレスな構成でストリーミングをする方法もついでに紹介します。
