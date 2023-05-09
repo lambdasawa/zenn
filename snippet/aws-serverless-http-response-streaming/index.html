@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>test</title>
+  </head>
+  <body>
+    <h1>test</h1>
+
+    <script>
+      {
+        fetch("http://localhost:1323/transfer-encoding")
+          .then((response) => {
+            const reader = response.body.getReader();
+            return reader.read().then(function processResult(result) {
+              if (result.done) {
+                return;
+              }
+
+              const text = new TextDecoder().decode(result.value);
+              console.log(`transfer-encoding: ${text}`);
+
+              return reader.read().then(processResult);
+            });
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+
+      {
+        const eventSource = new EventSource("http://localhost:1323/sse");
+        eventSource.addEventListener("test", (event) => {
+          const text = event.data;
+          console.log("sse test message:", event);
+        });
+        eventSource.addEventListener("open", (event) => {
+          console.log("sse open:", event);
+        });
+        eventSource.addEventListener("close", (event) => {
+          console.log("sse close:", event);
+        });
+        eventSource.addEventListener("error", (error) => {
+          console.log("sse error:", error);
+          eventSource.close();
+        });
+      }
+
+      {
+        const webSocket = new WebSocket("ws://localhost:1323/websocket");
+        webSocket.addEventListener("message", (event) => {
+          console.log("websocket message:", event);
+        });
+        webSocket.addEventListener("open", (event) => {
+          console.log("websocket open:", event);
+        });
+        webSocket.addEventListener("close", (event) => {
+          console.log("websocket close:", event);
+        });
+        webSocket.addEventListener("error", (error) => {
+          console.log("websocket error:", event);
+        });
+      }
+    </script>
+  </body>
+</html>
