@@ -14,7 +14,7 @@
         fetch("http://localhost:1323/transfer-encoding")
           .then((response) => {
             const reader = response.body.getReader();
-            return reader.read().then(function processResult(result) {
+            return reader.read().then(function processText(result) {
               if (result.done) {
                 return;
               }
@@ -22,7 +22,7 @@
               const text = new TextDecoder().decode(result.value);
               console.log(`transfer-encoding: ${text}`);
 
-              return reader.read().then(processResult);
+              return reader.read().then(processText);
             });
           })
           .catch((error) => {
