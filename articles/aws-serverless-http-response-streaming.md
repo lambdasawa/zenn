@@ -3,7 +3,7 @@ title: "AWS 上でサーバレス構成で HTTP レスポンスをストリー�
 emoji: "🌌"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["aws", "go"]
-published: false
+published: true
 ---
 
 ## はじめに
