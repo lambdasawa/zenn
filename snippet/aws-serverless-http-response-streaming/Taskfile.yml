@@ -1,0 +1,16 @@
+version: '3'
+
+tasks:
+  run:
+    cmds:
+      - watchexec -r -e go,html -- go run main.go
+
+  build:
+    cmds:
+      - GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
+
+  deploy:
+   cmds:
+      - task: build
+      - terraform init -upgrade
+      - terraform apply -auto-approve
