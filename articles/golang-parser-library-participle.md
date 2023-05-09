@@ -3,6 +3,7 @@ title: "Goで複雑な検索クエリをパースする"
 emoji: "🅿️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["go"]
+publication_name: "microcms"
 published: true
 ---
 
@@ -243,7 +244,7 @@ func (o *OrQuery) ToElastic() elastic.Query {
 	}
 
 	// elasticsearch では should で OR 検索になる
-	return elastic.NewBoolQuery().Should(queries...) 
+	return elastic.NewBoolQuery().Should(queries...)
 }
 
 func (o *AndQuery) ToElastic() elastic.Query {

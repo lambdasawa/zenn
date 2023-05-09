@@ -3,6 +3,7 @@ title: "GoからJavaScriptのライブラリを呼び出す"
 emoji: "🔔"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["go", "javascript"]
+publication_name: "microcms"
 published: true
 ---
 
@@ -143,7 +144,7 @@ func fillTemplate(template string) string {
 
 ```diff
 - const someClientValue = "some client value";
-- 
+-
 async function callSendMailAPI(body) {
   await fetch("http://localhost:8192/", { method: "POST", body });
 }
@@ -151,7 +152,7 @@ async function callSendMailAPI(body) {
 - function fillTemplate(template) {
 -   return nunjucks.renderString(template, { clientValue: someClientValue });
 - }
-- 
+-
 function App() {
 -  const [template, setTemplate] = useState("<h1>Hello, {{ clientValue.toUpperCase() }}!</h1>");
 +  const [template, setTemplate] = useState("<h1>Hello, {{ serverValue.toUpperCase() }}!</h1>");
@@ -169,7 +170,7 @@ function App() {
 ```diff
 + //go:embed dist.js
 + var gojaJS string
-+ 
++
 // これをメールに含めたい
 const someServerValue = "some server value"
 
@@ -189,17 +190,17 @@ func main() {
 
 + func fillTemplate(template string) string {
 +    vm := goja.New()
-+ 
++
 +   // JavaScript ランタイム上のグローバル変数に Go の値を渡す
 +    _ = vm.Set("template", template)
 +    _ = vm.Set("serverValue", someServerValue)
-+ 
++
 +    _, _ = vm.RunString(gojaJS)
-+ 
++
 +   // JavaScript ランタイム上のグローバル変数の値を読み取る
 +   return vm.Get("result").String()
 + }
-+ 
++
 ```
 
 ## 最後に

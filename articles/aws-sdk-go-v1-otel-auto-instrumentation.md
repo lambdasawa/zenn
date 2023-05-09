@@ -3,6 +3,7 @@ title: "AWS SDK for Go v1 の API 呼び出しごとに OpenTelemetry の Span �
 emoji: "👁️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["go", "opentelemetry"]
+publication_name: "microcms"
 published: true
 ---
 

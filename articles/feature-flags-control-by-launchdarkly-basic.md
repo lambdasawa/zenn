@@ -3,6 +3,7 @@ title: "LaunchDarkly による Feature Flags 制御の基礎"
 emoji: "⛳"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["launchdarkly"]
+publication_name: "microcms"
 published: true
 ---
 
