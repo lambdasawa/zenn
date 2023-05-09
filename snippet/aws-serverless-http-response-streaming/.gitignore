@@ -1,0 +1,9 @@
+# dotenv
+.env
+
+# golang
+bootstrap*
+
+# terraform
+.terraform/
+*.tfstate*
