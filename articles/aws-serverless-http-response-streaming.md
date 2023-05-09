@@ -2,7 +2,8 @@
 title: "AWS 上でサーバレス構成で HTTP レスポンスをストリーミングする"
 emoji: "🌌"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["aws", "go"]
+topics: ["aws", "go", "http"]
+publication_name: "microcms"
 published: true
 ---
 
